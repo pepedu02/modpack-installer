@@ -20,8 +20,15 @@ in the normal Windows Downloads folder, and it is not extracted automatically.
 1. Keep the files together in the same folder.
 2. Double-click `update-modpack.bat`.
 3. Wait for the download to finish.
-4. Open the ZIP from the `download` folder and extract it into your Minecraft
-   instance folder.
+4. Choose whether you want to use the direct-install option.
+5. If you do not use direct installation, open the ZIP from the `download`
+   folder and extract it into your Minecraft instance folder.
 
-The download folder opens automatically when the update succeeds. If there is
-an error, the terminal stays open so you can read the message.
+If you choose direct installation, the updater checks for the official
+Minecraft Launcher and the required Forge version. It then extracts the
+modpack into a separate `Flan's Modpack` installation in the launcher. Future
+updates replace the modpack-managed folders while preserving personal folders
+and settings. Resource packs, shaders, saves, screenshots, and other
+player-owned folders are not removed. The download folder opens automatically
+when the update succeeds. If there is an error, the terminal stays open so you
+can read the message.

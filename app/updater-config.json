@@ -1,4 +1,5 @@
 {
   "manifestUrl": "https://drive.usercontent.google.com/download?id=11qj-9D37Wcd3t97L2sxUuxOCXKaeKBLo&export=download&confirm=t",
-  "cacheDirectory": "%INSTALLER_DIRECTORY%\\..\\download"
+  "cacheDirectory": "%INSTALLER_DIRECTORY%\\..\\download",
+  "installRoot": "%APPDATA%\\.flan-mods"
 }
