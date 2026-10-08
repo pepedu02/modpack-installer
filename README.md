@@ -1,4 +1,4 @@
-# Modpack updater
+# Modpack Installer/Updater
 
 This project downloads the latest Flan's modpack ZIP for you.
 
