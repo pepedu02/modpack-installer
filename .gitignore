@@ -16,3 +16,6 @@ Desktop.ini
 *.tmp
 *.temp
 *.log
+
+# Generated release files
+/release/
