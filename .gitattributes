@@ -1,0 +1,8 @@
+# Keep scripts and configuration files consistent across platforms.
+*.bat text eol=crlf
+*.ps1 text eol=crlf
+*.json text eol=lf
+*.md text eol=lf
+
+# Avoid treating modpack archives as source code.
+*.zip binary

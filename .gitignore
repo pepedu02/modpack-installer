@@ -1,0 +1,18 @@
+# Local downloads and generated files
+/download/
+*.download
+
+# Local backups and large modpack archives
+/backup/
+*.zip
+
+# User-specific editor and operating-system files
+.DS_Store
+Thumbs.db
+Desktop.ini
+.vscode/
+
+# PowerShell and temporary files
+*.tmp
+*.temp
+*.log
