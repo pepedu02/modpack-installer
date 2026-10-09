@@ -213,8 +213,8 @@ function Confirm-DirectInstallPrerequisites {
 
     $versionsDirectory = Join-Path $minecraftDirectory 'versions'
     $requiredVersionDirectories = @(
-        '1.20.1-forge-47.4.20',
-        'forge-1.20.1-47.4.20'
+        '1.20.1-forge-47.4.26',
+        'forge-1.20.1-47.4.26'
     )
     $installedVersion = $null
 
