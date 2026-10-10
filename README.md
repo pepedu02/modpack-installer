@@ -25,7 +25,7 @@ in the normal Windows Downloads folder, and it is not extracted automatically.
    folder and extract it into your Minecraft instance folder.
 
 If you choose direct installation, the updater checks for the official
-Minecraft Launcher and the required Forge version. It then extracts the
+Minecraft folder and the required Forge version. It then extracts the
 modpack into a separate `Flan's Modpack` installation in the launcher. Future
 updates replace the modpack-managed folders while preserving personal folders
 and settings. Resource packs, shaders, saves, screenshots, and other

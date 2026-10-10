@@ -150,46 +150,6 @@ function Download-FileWithProgress {
     }
 }
 
-function Test-OfficialMinecraftLauncher {
-    $launcherPaths = @(
-        (Join-Path ${env:ProgramFiles(x86)} 'Minecraft Launcher\MinecraftLauncher.exe'),
-        (Join-Path $env:ProgramFiles 'Minecraft Launcher\MinecraftLauncher.exe'),
-        (Join-Path $env:LOCALAPPDATA 'Programs\Minecraft Launcher\MinecraftLauncher.exe')
-    )
-
-    foreach ($launcherPath in $launcherPaths) {
-        if ($launcherPath -and (Test-Path -LiteralPath $launcherPath -PathType Leaf)) {
-            return $true
-        }
-    }
-
-    return $false
-}
-
-function Test-PremiumMinecraftAccount {
-    param(
-        [Parameter(Mandatory = $true)]
-        [string] $MinecraftDirectory
-    )
-
-    $accountsPath = Join-Path $MinecraftDirectory 'launcher_accounts.json'
-    if (-not (Test-Path -LiteralPath $accountsPath -PathType Leaf)) {
-        return $false
-    }
-
-    try {
-        $accountsData = Get-Content -LiteralPath $accountsPath -Raw | ConvertFrom-Json
-        $activeAccountId = [string] $accountsData.activeAccountLocalId
-        $account = $accountsData.accounts.$activeAccountId
-        return $null -ne $account -and
-            $account.legacy -eq $false -and
-            $null -ne $account.minecraftProfile
-    }
-    catch {
-        return $false
-    }
-}
-
 function Confirm-DirectInstallPrerequisites {
     $answer = Read-Host 'Do you want to install the modpack directly into Minecraft? (Y/N)'
     if ($answer -notmatch '^(y|yes)$') {
@@ -197,18 +157,9 @@ function Confirm-DirectInstallPrerequisites {
         return
     }
 
-    if (-not (Test-OfficialMinecraftLauncher)) {
-        throw 'The official Minecraft Launcher was not found. Direct installation requires a premium Minecraft account and the official launcher.'
-    }
-
     $minecraftDirectory = Join-Path $env:APPDATA '.minecraft'
-    if (-not (Test-PremiumMinecraftAccount -MinecraftDirectory $minecraftDirectory)) {
-        throw 'An active premium Minecraft account could not be confirmed in the official launcher. Sign in to the launcher before using direct installation.'
-    }
-
-    $launcherProcesses = Get-Process -Name 'MinecraftLauncher' -ErrorAction SilentlyContinue
-    if ($null -ne $launcherProcesses) {
-        throw 'Please close the official Minecraft Launcher before installing the modpack, then run the updater again.'
+    if (-not (Test-Path -LiteralPath $minecraftDirectory -PathType Container)) {
+        throw "The Minecraft directory was not found at '$minecraftDirectory'."
     }
 
     $versionsDirectory = Join-Path $minecraftDirectory 'versions'
@@ -227,7 +178,7 @@ function Confirm-DirectInstallPrerequisites {
     }
 
     if ($null -eq $installedVersion) {
-        throw 'Required Minecraft Forge version 1.20.1 (47.4.20) was not found in the .minecraft\versions folder.'
+        throw 'Required Minecraft Forge version 1.20.1 (47.4.26) was not found in the .minecraft\versions folder.'
     }
 
     return @{
@@ -249,13 +200,30 @@ function Install-Modpack {
     )
 
     $launcherProfilesPath = Join-Path $Prerequisites.MinecraftDirectory 'launcher_profiles.json'
-    if (-not (Test-Path -LiteralPath $launcherProfilesPath -PathType Leaf)) {
-        throw "Minecraft launcher profiles were not found at '$launcherProfilesPath'."
+    if (Test-Path -LiteralPath $launcherProfilesPath -PathType Leaf) {
+        $profileData = Get-Content -LiteralPath $launcherProfilesPath -Raw | ConvertFrom-Json
+        if ($null -eq $profileData.profiles) {
+            throw 'The Minecraft launcher profile file does not contain a profiles object.'
+        }
     }
-
-    $profileData = Get-Content -LiteralPath $launcherProfilesPath -Raw | ConvertFrom-Json
-    if ($null -eq $profileData.profiles) {
-        throw 'The Minecraft launcher profile file does not contain a profiles object.'
+    else {
+        $profileData = [pscustomobject] @{
+            profiles = [pscustomobject] @{}
+            settings = [pscustomobject] @{
+                enableAdvanced = $false
+                enableAnalytics = $true
+                enableHistorical = $false
+                enableReleases = $true
+                enableSnapshots = $false
+                keepLauncherOpen = $true
+                profileSorting = 'ByLastPlayed'
+                showGameLog = $false
+                showMenu = $false
+                soundOn = $false
+            }
+            version = 6
+        }
+        Write-Host 'No launcher profile file was found; a new one will be created.'
     }
 
     $safeVersion = $Version.Trim()
@@ -327,7 +295,9 @@ function Install-Modpack {
     }
 
     $backupPath = "$launcherProfilesPath.backup"
-    Copy-Item -LiteralPath $launcherProfilesPath -Destination $backupPath -Force
+    if (Test-Path -LiteralPath $launcherProfilesPath -PathType Leaf) {
+        Copy-Item -LiteralPath $launcherProfilesPath -Destination $backupPath -Force
+    }
 
     $profileId = [Guid]::NewGuid().ToString('N')
     $profile = [ordered] @{
@@ -356,8 +326,15 @@ function Install-Modpack {
     Move-Item -LiteralPath $temporaryProfilesPath -Destination $launcherProfilesPath -Force
 
     Write-Host "Flan's Modpack was installed to $installDirectory."
-    Write-Host "The launcher profile 'Flan's Modpack' was created."
-    Write-Host "A launcher profile backup was saved to $backupPath."
+    if ($null -ne $existingProfile) {
+        Write-Host "The existing launcher profile 'Flan's Modpack' was updated."
+    }
+    else {
+        Write-Host "The launcher profile 'Flan's Modpack' was created."
+    }
+    if (Test-Path -LiteralPath $backupPath -PathType Leaf) {
+        Write-Host "A launcher profile backup was saved to $backupPath."
+    }
 }
 
 if (-not (Test-Path -LiteralPath $configPath -PathType Leaf)) {
